@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reel Finder | Movie Discovery</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+            --gold: #f59e0b;
+            --pink: #ec4899;
+            --indigo-soft: #6366f1;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding: 2rem;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        h1 {
+            color: var(--gold);
+            font-size: 2rem;
+            letter-spacing: 1px;
+            cursor: pointer;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .watchlist-btn {
+            background: #334155;
+            color: white;
+            border: 1px solid #475569;
+            padding: 0.6rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .watchlist-btn.active {
+            background: var(--pink);
+            border-color: var(--pink);
+        }
+
+        .search-box {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .search-box input {
+            padding: 0.6rem 1rem;
+            border-radius: 6px;
+            border: 1px solid #334155;
+            background: #1e293b;
+            color: white;
+            outline: none;
+            width: 250px;
+        }
+
+        .search-box button {
+            padding: 0.6rem 1.2rem;
+            background: var(--gold);
+            border: none;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* Controls Section */
+        .controls-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            background: var(--card-bg);
+            padding: 1rem;
+            border-radius: 8px;
+        }
+
+        .genre-chips-container {
+            display: flex;
+            gap: 0.5rem;
+            overflow-x: auto;
+            padding-bottom: 0.3rem;
+            max-width: 70%;
+        }
+
+        .genre-filter-chip {
+            background: #334155;
+            color: var(--text-main);
+            border: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: background 0.2s;
+        }
+
+        .genre-filter-chip:hover, .genre-filter-chip.active {
+            background: var(--gold);
+            color: #0f172a;
+            font-weight: bold;
+        }
+
+        .sort-box select {
+            padding: 0.5rem 0.8rem;
+            border-radius: 6px;
+            background: #334155;
+            color: white;
+            border: 1px solid #475569;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .movie-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .movie-card {
+            background: var(--card-bg);
+            border-radius: 10px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: transform 0.2s ease-in-out;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.3);
+            position: relative;
+            cursor: pointer;
+        }
+
+        .movie-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .favorite-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(15, 23, 42, 0.8);
+            border: none;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 5;
+            transition: transform 0.2s;
+        }
+
+        .favorite-btn:hover {
+            transform: scale(1.15);
+        }
+
+        .movie-poster {
+            width: 100%;
+            height: 320px;
+            object-fit: cover;
+            background: #000;
+        }
+
+        .movie-details {
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .movie-title {
+            font-size: 1.1rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .movie-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+            color: var(--text-sub);
+        }
+
+        .chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            border: 1px solid currentColor;
+        }
+
+        .offer.rent { color: var(--gold); }
+        .offer.buy { color: var(--pink); }
+
+        /* Modal Overlay */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--card-bg);
+            width: 100%;
+            max-width: 750px;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            position: relative;
+            height: 250px;
+            background-size: cover;
+            background-position: center;
+        }
+
+        .modal-header::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to top, var(--card-bg), transparent);
+        }
+
+        .close-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: rgba(0, 0, 0, 0.6);
+            color: white;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .modal-body {
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .modal-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-fav-btn {
+            background: var(--pink);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .genre-list {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .genre-tag {
+            background: #334155;
+            padding: 0.2rem 0.6rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            color: var(--text-main);
+        }
+
+        /* Streaming Providers Styling */
+        .provider-section {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+            background: #0f172a;
+            padding: 1rem;
+            border-radius: 8px;
+        }
+
+        .provider-category {
+            display: flex;
+            align-items: center;
+            gap: 0.8rem;
+            flex-wrap: wrap;
+        }
+
+        .provider-category label {
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: var(--gold);
+            min-width: 60px;
+        }
+
+        .provider-logo {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            object-fit: cover;
+        }
+
+        .site-footer {
+            margin-top: 56px;
+            padding-top: 1rem;
+            border-top: 1px solid #334155;
+            text-align: center;
+            color: var(--text-sub);
+        }
+
+        .site-footer a {
+            color: var(--gold);
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1 onclick="resetDashboard()">🎬 Reel Finder</h1>
+        <div class="header-actions">
+            <button class="watchlist-btn" id="watchlistToggleBtn" onclick="toggleWatchlistView()">
+                ❤️ Watchlist (<span id="watchlistCount">0</span>)
+            </button>
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Search movies...">
+                <button onclick="handleSearch()">Search</button>
+            </div>
+        </div>
+    </header>
+
+    <div class="controls-bar" id="controlsBar">
+        <div class="genre-chips-container" id="genreContainer">
+            <button class="genre-filter-chip active" onclick="filterByGenre(null, this)">All</button>
+            <!-- Genres load dynamically -->
+        </div>
+        <div class="sort-box">
+            <label for="sortSelect" style="font-size: 0.85rem; color: var(--text-sub); margin-right: 0.5rem;">Sort by:</label>
+            <select id="sortSelect" onchange="sortCurrentMovies()">
+                <option value="popularity">Popularity</option>
+                <option value="rating">Rating (High to Low)</option>
+                <option value="release_date">Release Date (Newest)</option>
+            </select>
+        </div>
+    </div>
+
+    <main class="movie-grid" id="movieGrid">
+        <!-- Movies render here -->
+    </main>
+
+    <!-- Details Modal -->
+    <div class="modal-overlay" id="movieModal" onclick="closeModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <button class="close-btn" onclick="closeModalDirect()">×</button>
+            <div class="modal-header" id="modalHeader"></div>
+            <div class="modal-body">
+                <div class="modal-actions">
+                    <h2 id="modalTitle" style="color: var(--gold);"></h2>
+                    <button class="modal-fav-btn" id="modalFavBtn"></button>
+                </div>
+                <p id="modalTagline" style="font-style: italic; color: var(--text-sub);"></p>
+                <div class="genre-list" id="modalGenres"></div>
+                <div style="display: flex; gap: 1.5rem; color: var(--text-sub); font-size: 0.9rem;">
+                    <span id="modalRuntime"></span>
+                    <span id="modalRating"></span>
+                    <span id="modalRelease"></span>
+                </div>
+                <h3 style="margin-top: 0.5rem;">Overview</h3>
+                <p id="modalOverview" style="line-height: 1.6; color: #cbd5e1;"></p>
+
+                <!-- Streaming Providers Area -->
+                <h3 style="margin-top: 0.5rem;">Where to Watch</h3>
+                <div class="provider-section" id="modalProviders">
+                    <p style="color: var(--text-sub); font-size: 0.85rem;">Loading streaming providers...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="site-footer">
+        <p>Powered by <a href="https://www.themoviedb.org/" target="_blank">TMDb API</a></p>
+    </footer>
+
+    <script>
+        const movieGrid = document.getElementById('movieGrid');
+        const searchInput = document.getElementById('searchInput');
+        const movieModal = document.getElementById('movieModal');
+        const genreContainer = document.getElementById('genreContainer');
+        const sortSelect = document.getElementById('sortSelect');
+        const watchlistCount = document.getElementById('watchlistCount');
+        const watchlistToggleBtn = document.getElementById('watchlistToggleBtn');
+        const controlsBar = document.getElementById('controlsBar');
+
+        let currentMovieList = [];
+        let isWatchlistView = false;
+
+        // LocalStorage Watchlist Helper
+        function getWatchlist() {
+            return JSON.parse(localStorage.getItem('reel_finder_watchlist')) || [];
+        }
+
+        function saveWatchlist(list) {
+            localStorage.setItem('reel_finder_watchlist', JSON.stringify(list));
+            updateWatchlistCount();
+        }
+
+        function updateWatchlistCount() {
+            watchlistCount.innerText = getWatchlist().length;
+        }
+
+        function toggleWatchlist(movie, event) {
+            if (event) event.stopPropagation();
+            let list = getWatchlist();
+            const exists = list.some(m => m.id === movie.id);
+
+            if (exists) {
+                list = list.filter(m => m.id !== movie.id);
+            } else {
+                list.push(movie);
+            }
+
+            saveWatchlist(list);
+
+            if (isWatchlistView) {
+                renderWatchlist();
+            } else {
+                sortAndRender();
+            }
+        }
+
+        function isMovieInWatchlist(id) {
+            return getWatchlist().some(m => m.id === id);
+        }
+
+        // Toggle Watchlist View
+        function toggleWatchlistView() {
+            isWatchlistView = !isWatchlistView;
+            if (isWatchlistView) {
+                watchlistToggleBtn.classList.add('active');
+                controlsBar.style.display = 'none';
+                renderWatchlist();
+            } else {
+                watchlistToggleBtn.classList.remove('active');
+                controlsBar.style.display = 'flex';
+                fetchTrendingMovies();
+            }
+        }
+
+        function renderWatchlist() {
+            const list = getWatchlist();
+            if (list.length === 0) {
+                movieGrid.innerHTML = '<p style="grid-column: 1/-1; text-align: center;">Your watchlist is currently empty. Click ❤️ on movies to save them!</p>';
+            } else {
+                currentMovieList = list;
+                renderMovies(list);
+            }
+        }
+
+        // Load Genres
+        async function loadGenres() {
+            try {
+                const res = await fetch('/api/genres');
+                const data = await res.json();
+                if (data.genres) {
+                    data.genres.forEach(g => {
+                        const btn = document.createElement('button');
+                        btn.className = 'genre-filter-chip';
+                        btn.innerText = g.name;
+                        btn.onclick = (e) => filterByGenre(g.id, e.target);
+                        genreContainer.appendChild(btn);
+                    });
+                }
+            } catch (err) {
+                console.error('Failed to load genres:', err);
+            }
+        }
+
+        // Fetch Trending
+        async function fetchTrendingMovies() {
+            movieGrid.innerHTML = '<p>Loading trending movies...</p>';
+            try {
+                const response = await fetch('/api/movies/trending');
+                const data = await response.json();
+                if (data.results && data.results.length > 0) {
+                    currentMovieList = data.results;
+                    sortAndRender();
+                } else {
+                    movieGrid.innerHTML = '<p>No movies found.</p>';
+                }
+            } catch (err) {
+                console.error(err);
+                movieGrid.innerHTML = '<p>Failed to load movies.</p>';
+            }
+        }
+
+        // Filter Genre
+        async function filterByGenre(genreId, element) {
+            document.querySelectorAll('.genre-filter-chip').forEach(c => c.classList.remove('active'));
+            if (element) element.classList.add('active');
+
+            if (!genreId) return fetchTrendingMovies();
+
+            movieGrid.innerHTML = '<p>Loading genre movies...</p>';
+            try {
+                const res = await fetch(`/api/movies/genre/${genreId}`);
+                const data = await res.json();
+                if (data.results && data.results.length > 0) {
+                    currentMovieList = data.results;
+                    sortAndRender();
+                } else {
+                    movieGrid.innerHTML = '<p>No movies found for this genre.</p>';
+                }
+            } catch (err) {
+                console.error(err);
+                movieGrid.innerHTML = '<p>Error loading genre movies.</p>';
+            }
+        }
+
+        // Sorting
+        function sortCurrentMovies() {
+            sortAndRender();
+        }
+
+        function sortAndRender() {
+            const sortBy = sortSelect.value;
+            let sorted = [...currentMovieList];
+
+            if (sortBy === 'rating') {
+                sorted.sort((a, b) => (b.vote_average || 0) - (a.vote_average || 0));
+            } else if (sortBy === 'release_date') {
+                sorted.sort((a, b) => new Date(b.release_date || 0) - new Date(a.release_date || 0));
+            }
+
+            renderMovies(sorted);
+        }
+
+        // Search
+        async function handleSearch() {
+            const query = searchInput.value.trim();
+            if (!query) return fetchTrendingMovies();
+
+            if (isWatchlistView) toggleWatchlistView();
+
+            movieGrid.innerHTML = '<p>Searching...</p>';
+            try {
+                const response = await fetch(`/api/movies/search?q=${encodeURIComponent(query)}`);
+                const data = await response.json();
+                if (data.results && data.results.length > 0) {
+                    currentMovieList = data.results;
+                    sortAndRender();
+                } else {
+                    movieGrid.innerHTML = '<p>No results match your query.</p>';
+                }
+            } catch (err) {
+                console.error(err);
+                movieGrid.innerHTML = '<p>Error executing search.</p>';
+            }
+        }
+
+        function resetDashboard() {
+            searchInput.value = '';
+            if (isWatchlistView) toggleWatchlistView();
+            filterByGenre(null, document.querySelector('.genre-filter-chip'));
+        }
+
+        // Render Cards
+        function renderMovies(movies) {
+            movieGrid.innerHTML = movies.map(movie => {
+                const poster = movie.poster_path 
+                    ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+                    : 'https://via.placeholder.com/500x750?text=No+Poster';
+
+                const inWatchlist = isMovieInWatchlist(movie.id);
+
+                return `
+                    <div class="movie-card" onclick="openMovieModal(${movie.id})">
+                        <button class="favorite-btn" onclick='toggleWatchlist(${JSON.stringify(movie).replace(/'/g, "&apos;")}, event)'>
+                            ${inWatchlist ? '❤️' : '🤍'}
+                        </button>
+                        <img class="movie-poster" src="${poster}" alt="${movie.title}">
+                        <div class="movie-details">
+                            <div class="movie-title">${movie.title}</div>
+                            <div class="movie-meta">
+                                <span>⭐ ${movie.vote_average ? movie.vote_average.toFixed(1) : 'N/A'}</span>
+                                <span>${movie.release_date ? movie.release_date.split('-')[0] : ''}</span>
+                            </div>
+                            <div class="chips">
+                                <span class="chip offer rent">RENT</span>
+                                <span class="chip offer buy">BUY</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Open Modal
+        async function openMovieModal(movieId) {
+            try {
+                const res = await fetch(`/api/movies/${movieId}`);
+                const movie = await res.json();
+
+                const backdrop = movie.backdrop_path 
+                    ? `https://image.tmdb.org/t/p/w1280${movie.backdrop_path}`
+                    : '';
+
+                document.getElementById('modalHeader').style.backgroundImage = backdrop ? `url(${backdrop})` : 'none';
+                document.getElementById('modalTitle').innerText = movie.title;
+                document.getElementById('modalTagline').innerText = movie.tagline ? `"${movie.tagline}"` : '';
+                document.getElementById('modalOverview').innerText = movie.overview || 'No synopsis available.';
+                document.getElementById('modalRuntime').innerText = movie.runtime ? `⏱️ ${movie.runtime} mins` : '';
+                document.getElementById('modalRating').innerText = `⭐ ${movie.vote_average ? movie.vote_average.toFixed(1) : 'N/A'} (${movie.vote_count} votes)`;
+                document.getElementById('modalRelease').innerText = movie.release_date ? `📅 ${movie.release_date}` : '';
+
+                const genresContainer = document.getElementById('modalGenres');
+                genresContainer.innerHTML = movie.genres ? movie.genres.map(g => `<span class="genre-tag">${g.name}</span>`).join('') : '';
+
+                const modalFavBtn = document.getElementById('modalFavBtn');
+                const inWatchlist = isMovieInWatchlist(movie.id);
+                modalFavBtn.innerText = inWatchlist ? '❤️ In Watchlist' : '🤍 Add to Watchlist';
+                modalFavBtn.onclick = () => {
+                    toggleWatchlist(movie);
+                    const nowIn = isMovieInWatchlist(movie.id);
+                    modalFavBtn.innerText = nowIn ? '❤️ In Watchlist' : '🤍 Add to Watchlist';
+                };
+
+                // Fetch Watch Providers
+                loadWatchProviders(movieId);
+
+                movieModal.classList.add('active');
+            } catch (err) {
+                console.error('Failed to load movie details:', err);
+            }
+        }
+
+        async function loadWatchProviders(movieId) {
+            const providersContainer = document.getElementById('modalProviders');
+            providersContainer.innerHTML = '<p style="color: var(--text-sub); font-size: 0.85rem;">Loading streaming providers...</p>';
+
+            try {
+                const res = await fetch(`/api/movies/${movieId}/providers`);
+                const data = await res.json();
+
+                // Select US providers by default or fallback to any available region
+                const usProviders = data.results ? (data.results.US || Object.values(data.results)[0]) : null;
+
+                if (!usProviders || (!usProviders.flatrate && !usProviders.rent && !usProviders.buy)) {
+                    providersContainer.innerHTML = '<p style="color: var(--text-sub); font-size: 0.85rem;">No streaming/rent data currently available.</p>';
+                    return;
+                }
+
+                let html = '';
+
+                if (usProviders.flatrate) {
+                    html += `
+                        <div class="provider-category">
+                            <label>STREAM:</label>
+                            ${usProviders.flatrate.map(p => `
+                                <img class="provider-logo" src="https://image.tmdb.org/t/p/original${p.logo_path}" title="${p.provider_name}" alt="${p.provider_name}">
+                            `).join('')}
+                        </div>
+                    `;
+                }
+
+                if (usProviders.rent) {
+                    html += `
+                        <div class="provider-category">
+                            <label>RENT:</label>
+                            ${usProviders.rent.map(p => `
+                                <img class="provider-logo" src="https://image.tmdb.org/t/p/original${p.logo_path}" title="${p.provider_name}" alt="${p.provider_name}">
+                            `).join('')}
+                        </div>
+                    `;
+                }
+
+                if (usProviders.buy) {
+                    html += `
+                        <div class="provider-category">
+                            <label>BUY:</label>
+                            ${usProviders.buy.map(p => `
+                                <img class="provider-logo" src="https://image.tmdb.org/t/p/original${p.logo_path}" title="${p.provider_name}" alt="${p.provider_name}">
+                            `).join('')}
+                        </div>
+                    `;
+                }
+
+                providersContainer.innerHTML = html;
+            } catch (err) {
+                console.error('Failed to load watch providers:', err);
+                providersContainer.innerHTML = '<p style="color: var(--text-sub); font-size: 0.85rem;">Unable to load provider data.</p>';
+            }
+        }
+
+        function closeModal(event) {
+            if (event.target === movieModal) movieModal.classList.remove('active');
+        }
+
+        function closeModalDirect() {
+            movieModal.classList.remove('active');
+        }
+
+        // Initialize Page
+        updateWatchlistCount();
+        loadGenres();
+        fetchTrendingMovies();
+    </script>
+</body>
+</html>
